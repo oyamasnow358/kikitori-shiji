@@ -288,9 +288,9 @@ function jaSay(t) {
      「あかい ボールを はこに いれて」を きいて、うごかす（ドラッグ／タッチ→タッチ）
      ============================================================ */
   const COLORS = { r: ['あか', 'あかい', '#FA5252', '#C92A2A'], b: ['あお', 'あおい', '#339AF0', '#1864AB'], y: ['きいろ', 'きいろい', '#FCC419', '#E67700'], g: ['みどり', 'みどりの', '#51CF66', '#2B8A3E'] };
-  const KINDS = { ball: 'ボール', block: 'つみき', tri: 'さんかく', star: 'ほし', heart: 'ハート', car: 'くるま' };
+  const KINDS = { ball: 'ボール', block: 'つみき', tri: 'さんかく', star: 'ほし', heart: 'ハート', car: 'くるま', cup: 'コップ', fish: 'さかな', flower: 'はな' };
   const CONTS = { box: ['📦', 'はこ', 'に いれて'], kago: ['🧺', 'かご', 'に いれて'], bag: ['🛍️', 'ふくろ', 'に いれて'], plate: ['🍽️', 'おさら', 'に のせて'] };
-  function itemSVG(k, c) {
+  function itemSVG(k, c, z) {
     const C = COLORS[c] || ['', '', '#fff', '#333'], f = C[2], s = C[3];
     const body = {
       ball: '<circle cx="50" cy="52" r="38" fill="' + f + '" stroke="' + s + '" stroke-width="4"/><ellipse cx="36" cy="38" rx="10" ry="7" fill="#fff" opacity=".6"/>',
@@ -299,8 +299,11 @@ function jaSay(t) {
       star: '<polygon points="50,8 61,38 93,38 67,57 77,89 50,70 23,89 33,57 7,38 39,38" fill="' + f + '" stroke="' + s + '" stroke-width="4" stroke-linejoin="round"/>',
       heart: '<path d="M50 88 C12 62 6 40 18 26 C30 12 46 18 50 32 C54 18 70 12 82 26 C94 40 88 62 50 88Z" fill="' + f + '" stroke="' + s + '" stroke-width="4" stroke-linejoin="round"/>',
       car: '<rect x="8" y="44" width="84" height="28" rx="10" fill="' + f + '" stroke="' + s + '" stroke-width="4"/><path d="M26 46 L36 24 H66 L78 46Z" fill="' + f + '" stroke="' + s + '" stroke-width="4" stroke-linejoin="round"/><path d="M38 30 H50 V44 H32Z M56 30 H64 L72 44 H56Z" fill="#E7F5FF"/><circle cx="28" cy="74" r="10" fill="#343A40"/><circle cx="72" cy="74" r="10" fill="#343A40"/>'
+      , cup: '<path d="M22 22 H78 L70 88 H30Z" fill="' + f + '" stroke="' + s + '" stroke-width="4" stroke-linejoin="round"/><path d="M78 36 C96 36 96 64 74 66" fill="none" stroke="' + s + '" stroke-width="5"/><rect x="28" y="30" width="10" height="40" rx="4" fill="#fff" opacity=".4"/>',
+      fish: '<path d="M10 50 C24 26 58 22 74 50 C58 78 24 74 10 50Z" fill="' + f + '" stroke="' + s + '" stroke-width="4"/><path d="M72 50 L94 32 L94 68Z" fill="' + f + '" stroke="' + s + '" stroke-width="4" stroke-linejoin="round"/><circle cx="30" cy="46" r="5" fill="#212529"/>',
+      flower: '<g fill="' + f + '" stroke="' + s + '" stroke-width="3">' + [0, 72, 144, 216, 288].map(r => '<ellipse cx="50" cy="28" rx="13" ry="20" transform="rotate(' + r + ' 50 50)"/>').join('') + '</g><circle cx="50" cy="50" r="12" fill="#FFE066" stroke="#E67700" stroke-width="3"/>'
     }[k];
-    return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' + body + '</svg>';
+    return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' + (z === 's' ? '<g transform="translate(50 50) scale(.58) translate(-50 -50)">' + body + '</g>' : body) + '</svg>';
   }
   const LEVELS = [
     { n: 'えらぶ（1つ）', s: 'ものの なまえを きいて タッチ', ex: '「ほしを タッチ して」', c: '#40C057' },
@@ -308,7 +311,9 @@ function jaSay(t) {
     { n: 'うごかす', s: 'ものを いれものに いれる', ex: '「くるまを かごに いれて」', c: '#FAB005' },
     { n: 'うごかす（いろ＋もの）', s: '3つの ことばを きく', ex: '「あおい つみきを はこに いれて」', c: '#FD7E14' },
     { n: '2つ つづけて', s: 'じゅんばんに 2つ する', ex: '「あかい ほしを はこに いれて、それから…」', c: '#E64980' },
-    { n: 'かずも', s: 'いくつ うごかすか きく', ex: '「きいろい ボールを 2こ おさらに のせて」', c: '#7048E8' }
+    { n: 'かずも', s: 'いくつ うごかすか きく', ex: '「きいろい ボールを 2こ おさらに のせて」', c: '#7048E8' },
+    { n: 'おおきさも', s: 'おおきい・ちいさいを ききわける', ex: '「ちいさい あかい さかなを かごに いれて」', c: '#1098AD' },
+    { n: '3つ つづけて', s: 'じゅんばんに 3つ する', ex: '「…、それから …、それから …」', c: '#C2255C' }
   ];
   const APP = {
     id: 'kikitori-shiji', title: 'ききとり しじ', ls: 'kikitori.v1', db: false, sw: true, color: '#1C7ED6',
@@ -783,36 +788,40 @@ const FX = (function () {
      ============================================================ */
   const cKeys = Object.keys(COLORS), kKeys = Object.keys(KINDS), contKeys = Object.keys(CONTS);
   function makeQ(lv) {
-    const L = lv + 1, useColor = L === 2 || L >= 4, move = L >= 3, nAct = L === 5 ? 2 : 1, cnt = L === 6;
+    const L = lv + 1, useColor = L === 2 || L >= 4, move = L >= 3, nAct = L === 5 ? 2 : L === 8 ? 3 : 1, cnt = L === 6, size = L === 7;
     const conts = move ? shuffle(contKeys).slice(0, L >= 5 ? 3 : 2) : [];
+    const kk = L <= 4 ? kKeys.slice(0, 6) : kKeys;
     const acts = [];
     for (let i = 0; i < nAct; i++) {
       let a;
-      for (let t = 0; t < 30; t++) { a = { k: pick(kKeys), c: useColor ? pick(cKeys) : null, n: cnt ? ri(2, 3) : 1, to: move ? pick(conts) : null }; if (!acts.some(x => x.k === a.k && x.c === a.c)) break; }
+      for (let t = 0; t < 30; t++) { a = { k: pick(kk), c: useColor ? pick(cKeys) : null, n: cnt ? ri(2, 3) : 1, to: move ? pick(conts) : null, z: size ? pick(['b', 's']) : null }; if (!acts.some(x => x.k === a.k && x.c === a.c)) break; }
       acts.push(a);
     }
     // トレイ：こたえ ＋ まぎらわしい もの（おなじ いろ・おなじ もの）
     const items = [];
-    const add = (k, c) => items.push({ id: uid(), k, c });
-    acts.forEach(a => { for (let i = 0; i < a.n; i++) add(a.k, a.c || pick(cKeys)); });
-    const total = L <= 2 ? 6 : 8;
+    const add = (k, c, z) => items.push({ id: uid(), k, c, z: size ? (z || pick(['b', 's'])) : null });
+    acts.forEach(a => { for (let i = 0; i < a.n; i++) add(a.k, a.c || pick(cKeys), a.z); });
+    // おおきさの レベルは「おなじ いろ・おなじ もの・ちがう おおきさ」を かならず まぜる
+    if (size) acts.forEach(a => add(a.k, a.c, a.z === 'b' ? 's' : 'b'));
+    const total = L <= 2 ? 6 : L === 8 ? 10 : 8;
     let guard = 0;
     while (items.length < total && guard++ < 200) {
       const a = pick(acts);
       const r = Math.random();
       let k, c;
       if (useColor && r < .35) { k = a.k; c = pick(cKeys.filter(x => x !== a.c)); }
-      else if (useColor && r < .7) { k = pick(kKeys.filter(x => x !== a.k)); c = a.c; }
-      else { k = pick(kKeys.filter(x => !acts.some(y => y.k === x))); c = pick(cKeys); }
+      else if (useColor && r < .7) { k = pick(kk.filter(x => x !== a.k)); c = a.c; }
+      else { k = pick(kk.filter(x => !acts.some(y => y.k === x))); c = pick(cKeys); }
       if (!useColor && acts.some(y => y.k === k)) continue;
-      if (useColor && acts.some(y => y.k === k && y.c === c)) continue;
+      if (useColor && !size && acts.some(y => y.k === k && y.c === c)) continue;
+      if (size && acts.some(y => y.k === k && y.c === c)) { add(k, c, acts.find(y => y.k === k && y.c === c).z === 'b' ? 's' : 'b'); continue; }
       add(k, c);
     }
-    const one = a => (a.c ? COLORS[a.c][1] + ' ' : '') + KINDS[a.k] + 'を ' + (a.n > 1 ? a.n + 'こ ' : '') + (a.to ? CONTS[a.to][1] + CONTS[a.to][2] : 'タッチ して');
+    const one = a => (a.z ? (a.z === 'b' ? 'おおきい ' : 'ちいさい ') : '') + (a.c ? COLORS[a.c][1] + ' ' : '') + KINDS[a.k] + 'を ' + (a.n > 1 ? a.n + 'こ ' : '') + (a.to ? CONTS[a.to][1] + CONTS[a.to][2] : 'タッチ して');
     const text = acts.map(one).join('、それから ') + '。';
     return { lv, items: shuffle(items), conts, acts, text, done: acts.map(() => 0) };
   }
-  const match = (it, a) => it.k === a.k && (!a.c || it.c === a.c);
+  const match = (it, a) => it.k === a.k && (!a.c || it.c === a.c) && (!a.z || it.z === a.z);
 
   /* ============================================================
      ホーム
@@ -846,15 +855,15 @@ const FX = (function () {
     box.append(h('button', { type: 'button', class: 'ear', 'aria-label': 'もういちど きく', onclick: () => { if (!tapOk(500)) return; G.listens++; sayQ(); } }, '🔊'),
       h('div', { style: 'flex:1;display:flex;flex-direction:column;gap:4px' },
         showText() ? h('div', { class: 'tx' }, q.text) : h('div', { class: 'tx hide' }, '🔊 を おすと なんかいでも きけるよ'),
-        showHint() ? h('div', { class: 'hint' }, q.acts.map((a, i) => h('span', { class: 'hi' + (q.done[i] >= a.n ? ' done' : '') }, h('span', { html: itemSVG(a.k, a.c || 'none') }), a.n > 1 ? h('b', null, '×' + a.n) : null, a.to ? [h('span', null, '➡'), E(CONTS[a.to][0])] : E('👆')))) : null),
+        showHint() ? h('div', { class: 'hint' }, q.acts.map((a, i) => h('span', { class: 'hi' + (q.done[i] >= a.n ? ' done' : '') }, h('span', { html: itemSVG(a.k, a.c || 'none', a.z) }), a.n > 1 ? h('b', null, '×' + a.n) : null, a.to ? [h('span', null, '➡'), E(CONTS[a.to][0])] : E('👆')))) : null),
       h('span', { class: 'prog' }, (G.i + 1) + ' / ' + S().qn));
   }
   function renderPlay() {
     screen = 'play';
     const q = G.q;
     const conts = q.conts.length ? h('div', { class: 'conts' }, q.conts.map(c => h('div', { class: 'cont', 'data-c': c, onclick: () => contTap(c) }, h('span', { class: 'ce' }, CONTS[c][0]), h('b', null, CONTS[c][1]), h('div', { class: 'in' })))) : null;
-    const tray = h('div', { class: 'tray', style: '--cols:' + (q.items.length <= 6 ? 3 : 4) }, q.items.map(it => {
-      const b = h('button', { type: 'button', class: 'it', 'data-id': it.id, 'aria-label': (it.c ? COLORS[it.c][1] + ' ' : '') + KINDS[it.k], html: itemSVG(it.k, it.c) });
+    const tray = h('div', { class: 'tray', style: '--cols:' + (q.items.length <= 6 ? 3 : q.items.length <= 8 ? 4 : 5) }, q.items.map(it => {
+      const b = h('button', { type: 'button', class: 'it', 'data-id': it.id, 'aria-label': (it.z ? (it.z === 'b' ? 'おおきい ' : 'ちいさい ') : '') + (it.c ? COLORS[it.c][1] + ' ' : '') + KINDS[it.k], html: itemSVG(it.k, it.c, it.z) });
       bindDrag(b, it); return b;
     }));
     setView('play' + (conts ? '' : ' nocont'), [h('div', { class: 'ins' }), conts, tray, h('div', { class: 'fbk' })]);
@@ -870,7 +879,7 @@ const FX = (function () {
     });
     b.addEventListener('pointermove', e => {
       if (!st || !G.q.conts.length || S().how === 'tap') return;
-      if (!st.moved && Math.hypot(e.clientX - st.x, e.clientY - st.y) > 10) { st.moved = true; ghost = h('div', { class: 'drag', html: itemSVG(it.k, it.c) }); document.body.append(ghost); b.style.opacity = '.3'; }
+      if (!st.moved && Math.hypot(e.clientX - st.x, e.clientY - st.y) > 10) { st.moved = true; ghost = h('div', { class: 'drag', html: itemSVG(it.k, it.c, it.z) }); document.body.append(ghost); b.style.opacity = '.3'; }
       if (ghost) { ghost.style.left = e.clientX + 'px'; ghost.style.top = e.clientY + 'px'; const c = contAt(e.clientX, e.clientY); document.querySelectorAll('.cont').forEach(x => x.classList.toggle('over', x === c)); }
     });
     const end = e => {
@@ -912,7 +921,7 @@ const FX = (function () {
     if (match(it, a) && a.to === to) {
       G.moved[it.id] = to; G.q.done[ai]++; sfx.step();
       if (el) el.classList.add('gone');
-      if (cel) cel.querySelector('.in').append(h('span', { html: itemSVG(it.k, it.c) }));
+      if (cel) cel.querySelector('.in').append(h('span', { html: itemSVG(it.k, it.c, it.z) }));
       renderIns();
       if (curAct() < 0) { FX.small(cel, { variant: 1 }); good(); }
       else if (G.q.done[ai] >= a.n && ai < G.q.acts.length - 1) { $('.fbk').textContent = 'いいね！ つぎは？'; }
@@ -920,7 +929,7 @@ const FX = (function () {
     }
     // どこが ちがう？
     const other = G.q.acts.findIndex((x, i) => i !== ai && G.q.done[i] < x.n && match(it, x) && x.to === to);
-    const msg = other >= 0 ? 'じゅんばんが ちがうよ。さきに いわれた ほうから' : !match(it, a) ? (a.c && it.k === a.k ? 'いろを よく きいてね' : 'ものを よく きいてね') : 'いれものを よく きいてね';
+    const msg = other >= 0 ? 'じゅんばんが ちがうよ。さきに いわれた ほうから' : !match(it, a) ? (a.z && it.k === a.k && it.c === a.c ? 'おおきさを よく きいてね' : a.c && it.k === a.k ? 'いろを よく きいてね' : 'ものを よく きいてね') : 'いれものを よく きいてね';
     wrong(cel || el, msg); if (el) { el.classList.add('ng'); }
   }
   function good() {
